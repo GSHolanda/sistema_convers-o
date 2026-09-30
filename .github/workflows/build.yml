@@ -1,0 +1,61 @@
+name: Testes e executável Windows
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -q
+
+  windows:
+    needs: testes
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+
+      - name: Gerar executável
+        run: >
+          pyinstaller --noconfirm --clean --onefile --windowed
+          --name ConversorPrevia
+          --icon assets/icone.ico
+          --add-data "modelo/modelo_dominio.xlsx;modelo"
+          --collect-data pdfminer
+          --exclude-module pypdfium2 --exclude-module pypdfium2_raw --exclude-module PIL
+          main.py
+
+      - name: Testar o executável com uma Prévia de exemplo
+        shell: pwsh
+        run: |
+          python -c "import sys; sys.path.insert(0, 'tests'); import pdf_exemplo; pdf_exemplo.gerar('previa_teste.pdf')"
+          $p = Start-Process -FilePath dist\ConversorPrevia.exe -ArgumentList '--converter','previa_teste.pdf','--saida','saida_teste' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "O executável terminou com código $($p.ExitCode)" }
+          python -c "import openpyxl; ws = openpyxl.load_workbook('saida_teste/dominio planilha - 0123 - 08-2026.xlsx').active; assert ws['C11'].value == 'BELTRANA DE SOUZA'; assert ws['D12'].value == 1234.56; assert ws['R13'].value == 15.12; print('Executável OK')"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ConversorPrevia-windows
+          path: dist/ConversorPrevia.exe
+
+      - name: Publicar versão (tags v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ConversorPrevia.exe

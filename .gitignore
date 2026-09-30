@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+dist/
+*.spec
+# Configuração local (razões sociais das empresas) e arquivos de clientes
+conversor_config.json
+*.pdf
+*.xlsx
+!modelo/modelo_dominio.xlsx
