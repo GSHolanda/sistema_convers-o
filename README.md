@@ -112,7 +112,7 @@ python -m conversor previa.pdf --saida pasta/      # converte pela linha de coma
   `python ferramentas/criar_modelo_limpo.py planilha.xlsx`.
 
 O executável é gerado automaticamente pelo GitHub Actions (`.github/workflows/build.yml`) a cada
-envio. Criar uma tag `v*` (ex.: `v1.0.0`) também publica o `.exe` na página **Releases**.
+envio. Para publicar uma versão na página **Releases**, rode a automação manualmente (Actions → "Testes e executável Windows" → Run workflow) informando a versão (ex.: `v1.0.1`), ou crie uma tag `v*`.
 
 **Privacidade:** este repositório é público. Não envie Prévias, planilhas de clientes nem o
 `conversor_config.json`; o `.gitignore` já bloqueia esses arquivos.

@@ -6,6 +6,11 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      versao:
+        description: "Publicar como versão (ex.: v1.0.0). Deixe vazio para só gerar o executável."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -54,8 +59,14 @@ jobs:
           name: ConversorPrevia-windows
           path: dist/ConversorPrevia.exe
 
-      - name: Publicar versão (tags v*)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publicar versão (tag v* ou execução manual com versão)
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.versao != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.inputs.versao || github.ref_name }}
+          name: Conversor Prévia → Planilha Domínio ${{ github.event.inputs.versao || github.ref_name }}
+          target_commitish: ${{ github.sha }}
           files: dist/ConversorPrevia.exe
+          body: |
+            Baixe o **ConversorPrevia.exe** abaixo, salve numa pasta sua e abra. Não precisa instalar.
+            Se o Windows mostrar "O Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo**.
