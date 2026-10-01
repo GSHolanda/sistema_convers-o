@@ -50,6 +50,21 @@ def test_montar_linhas_ordena_por_codigo_e_soma():
     assert resultado.ignorados == {(91, "DSR S/Comissões"): 1}
 
 
+def test_demitidos_ficam_sem_valores():
+    folha = Folha(123, "X")
+    folha.funcionarios = [
+        Funcionario(1, "A", situacao="Demitido", eventos=[evento(90, "Comissões", "100")]),
+        Funcionario(2, "B", demissao="14/08/2026", eventos=[evento(90, "Comissões", "50")]),
+        Funcionario(3, "C", situacao="Trabalhando", eventos=[evento(90, "Comissões", "10")]),
+    ]
+    linhas = montar_linhas(folha, Config()).linhas
+    assert [(l.codigo, l.nome, l.valores) for l in linhas] == [
+        (1, "A", {}), (2, "B", {}), (3, "C", {"37": Decimal(10)})
+    ]
+    config = Config({"demitidos_sem_valores": False})
+    assert montar_linhas(folha, config).linhas[0].valores == {"37": Decimal(100)}
+
+
 def test_tipo_de_calculo():
     config = Config()
     assert config.tipo_calculo(Folha(1, "X", tipo_calculo="Mensal")) == 11

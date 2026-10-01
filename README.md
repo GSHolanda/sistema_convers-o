@@ -69,7 +69,8 @@ planilha"** para ver a lista de cada Prévia.
 
 - **Férias:** as médias de comissão de férias (357, 364, 661, 672…) não entram na coluna
   Comissão, como na planilha de 07/2026.
-- **Demitidos:** entram com os valores da Prévia (ex.: comissão do saldo e desconto de refeição da rescisão).
+- **Demitidos:** aparecem na planilha (código e nome), mas com os valores em branco.
+  Para preencher os valores da rescisão, mude `demitidos_sem_valores` para `false` na configuração.
 - **Desconto Refeição (260):** na planilha de 07/2026 esta coluna tem valores que não aparecem
   na Prévia do mês. O desconto de vale refeição da Prévia vai para a coluna **Refeição (9999)**,
   como na planilha de 07/2026. Para mudar, veja *Configuração* abaixo.

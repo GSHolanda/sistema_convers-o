@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 
-from .leitor_pdf import Evento, Folha
+from .leitor_pdf import Evento, Folha, Funcionario
 
 VERSAO_CONFIG = 1
 
@@ -32,6 +32,8 @@ CONFIG_PADRAO: dict = {
         "13º Integral": 52,
     },
     "tipo_calculo_padrao": 11,
+    # Funcionários demitidos no período aparecem na planilha, mas sem valores.
+    "demitidos_sem_valores": True,
     # Chave = código da coluna na linha 10 do modelo.
     "colunas": {
         "37": {"titulo": "Comissão", "eventos": [90], "descricoes": ["Comissões", "Comissão"]},
@@ -162,13 +164,21 @@ class Resultado:
     ignorados: dict[tuple[int, str], int]  # (código, descrição) -> ocorrências
 
 
+def demitido(func: Funcionario) -> bool:
+    return bool(func.demissao) or normalizar(func.situacao).startswith("DEMITID")
+
+
 def montar_linhas(folha: Folha, config: Config) -> Resultado:
     """Converte os funcionários da Prévia em linhas da planilha (ordem de código)."""
     tipo = config.tipo_calculo(folha)
     linhas = []
     ignorados: dict[tuple[int, str], int] = {}
+    sem_valores_demitidos = config.dados.get("demitidos_sem_valores", True)
     for func in sorted(folha.funcionarios, key=lambda f: f.codigo):
         valores: dict[str, Decimal] = {}
+        if sem_valores_demitidos and demitido(func):
+            linhas.append(LinhaPlanilha(tipo, func.codigo, func.nome, valores))
+            continue
         for evento in func.eventos:
             coluna = config.coluna_do_evento(evento)
             if coluna is None:
