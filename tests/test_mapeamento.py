@@ -19,8 +19,9 @@ def test_evento_por_codigo_e_por_descricao():
     assert config.coluna_do_evento(evento(90, "Comissões", "1")) == "37"
     assert config.coluna_do_evento(evento(5555, "Comissões", "1")) == "37"
     assert config.coluna_do_evento(evento(1234, "Horas Extras 50%", "1")) == "150"
-    assert config.coluna_do_evento(evento(1211, "Desconto de Vale Refeição", "1", 3)) == "9999"
-    assert config.coluna_do_evento(evento(1860, "Contribuição Sindical", "1", 3)) == "52"
+    assert config.coluna_do_evento(evento(1211, "Desconto de Vale Refeição", "1", 3)) == "260"
+    assert config.coluna_do_evento(evento(357, "Media Comissoes/DSR Ferias", "1")) == "37"
+    assert config.coluna_do_evento(evento(1860, "Contribuição Sindical", "1", 3)) is None
 
 
 def test_eventos_ignorados():
@@ -28,7 +29,6 @@ def test_eventos_ignorados():
     for codigo, descricao in [
         (91, "DSR S/Comissões"),
         (884, "DSR Prêmio Produtividade"),
-        (357, "Media Comissoes/DSR Ferias"),
         (92, "Complemento Salário Normativo"),
         (816, "Vale Transporte (%)"),
         (1950, "INSS"),
@@ -46,7 +46,7 @@ def test_montar_linhas_ordena_por_codigo_e_soma():
     resultado = montar_linhas(folha, Config())
     assert [l.codigo for l in resultado.linhas] == [3, 20]
     assert resultado.linhas[0].valores == {"37": Decimal(100)}
-    assert resultado.linhas[1].valores == {"9999": Decimal("15.5")}
+    assert resultado.linhas[1].valores == {"260": Decimal("15.5")}
     assert resultado.ignorados == {(91, "DSR S/Comissões"): 1}
 
 
@@ -90,6 +90,17 @@ def test_config_salva_e_carrega(tmp_path):
     config.definir_razao_social(1, "ABC")
     config.salvar()
     assert Config.carregar(caminho).razao_social(Folha(1, "XYZ")) == "ABC"
+
+
+def test_config_antiga_recebe_regras_novas(tmp_path):
+    caminho = tmp_path / "cfg.json"
+    caminho.write_text(
+        '{"versao": 1, "colunas": {"37": {"eventos": [1], "descricoes": []}}, "razao_social": {"5": "ABC"}}',
+        encoding="utf-8",
+    )
+    config = Config.carregar(caminho)
+    assert config.dados["colunas"]["37"]["eventos"] == [90, 357]
+    assert config.razao_social(Folha(5, "XYZ")) == "ABC"
 
 
 def test_config_com_erro(tmp_path):

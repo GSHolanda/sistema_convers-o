@@ -34,8 +34,8 @@ def test_planilha_gerada(previa, tmp_path):
 
     linhas = [[ws.cell(r, c).value for c in range(1, 19)] for r in range(11, 15)]
     #          A   B   C                    D        E     F     G      H      I    J     K     L     M     N      O    P     Q   R
-    assert linhas[0] == [11, 5, "BELTRANA DE SOUZA", None, None, None, None, None, None, None, None, None, None, None, 275, None, None, 1.26]
-    assert linhas[1] == [11, 10, "FULANO DE TAL", 1234.56, None, None, 450.1, 46.33, 100, None, None, None, None, 13.26, 300, None, 42, 32.76]
+    assert linhas[0] == [11, 5, "BELTRANA DE SOUZA", 1500, None, None, None, None, None, None, None, None, None, None, 275, 1.26, None, None]
+    assert linhas[1] == [11, 10, "FULANO DE TAL", 1234.56, None, None, 450.1, 46.33, 100, None, None, None, None, 13.26, 300, 32.76, None, None]
     assert linhas[2] == [11, 20, "CICRANO PEREIRA", None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
     assert all(v is None for v in linhas[3])
 
@@ -47,8 +47,9 @@ def test_totais_calculados_gravados(previa, tmp_path):
     resultado = gerar(previa, tmp_path)
     ws = openpyxl.load_workbook(resultado.destino, data_only=True).active
     assert ws["B77"].value == 3
-    assert round(ws["D77"].value, 2) == 1234.56
-    assert round(ws["R77"].value, 2) == 34.02
+    assert round(ws["D77"].value, 2) == 2734.56
+    assert round(ws["P77"].value, 2) == 34.02
+    assert ws["R77"].value == 0
     assert ws["E77"].value == 0
 
 

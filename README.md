@@ -44,7 +44,7 @@ A área **Resultado** mostra os totais de cada coluna, para conferir com a Prév
 
 | Coluna | Código | Evento da Prévia |
 |---|---|---|
-| Comissão | 37 | 90 Comissões |
+| Comissão | 37 | 90 Comissões e 357 Média Comissões/DSR Férias |
 | Horas Extras 50% | 150 | evento com descrição "Horas Extras 50%" |
 | Prêmio Destaque | 299 | evento com descrição "Prêmio Destaque" |
 | Prêmio Mensal | 301 | 932 Premiações Mensais |
@@ -53,27 +53,25 @@ A área **Resultado** mostra os totais de cada coluna, para conferir com a Prév
 | Prêmio posição / Ranking / desempenho / mês anterior | 309 / 312 / 316 / 318 | evento com a descrição correspondente |
 | Complemento VR e VA | 305 | 1306 COMPLEMENTO VR E VA |
 | Auxílio Transporte | 259 | 687 Auxílio Vale Transporte |
-| Desconto Refeição | 260 | *(nenhum evento; ver observações)* |
-| Sindical | 52 | 1860 Contribuição Sindical |
-| Refeição | 9999 | 692 e 1211 Desconto de Vale Refeição |
+| Desconto Refeição | 260 | 692 e 1211 Desconto de Vale Refeição |
+| Sindical | 52 | *(fica em branco, como na planilha de 08/2026)* |
+| *(coluna R, sem título)* | 9999 | *(fica em branco)* |
 
 Um evento entra na coluna pelo **código** ou pela **descrição** (sem diferença de acentos ou
 maiúsculas). Assim, outras empresas que usam códigos diferentes para o mesmo evento também funcionam.
 
 Não entram na planilha: DSR, salário, diferença de salário, complemento de salário normativo,
-faltas, férias e médias de férias, 13º, verbas de rescisão, INSS, IRRF, desconto de vale
+faltas, 1/3 e demais médias de férias, 13º, contribuição sindical, verbas de rescisão, INSS, IRRF, desconto de vale
 transporte, adiantamento e empréstimo. Marque **"Listar eventos do PDF que não vão para a
 planilha"** para ver a lista de cada Prévia.
 
 ### Observações
 
-- **Férias:** as médias de comissão de férias (357, 364, 661, 672…) não entram na coluna
-  Comissão, como na planilha de 07/2026.
+- **Padrão:** as regras seguem a planilha de 08/2026 (modelo do escritório).
+- **Férias:** a média de comissões de férias (357) entra na coluna Comissão, como na planilha
+  de 08/2026.
 - **Demitidos:** aparecem na planilha (código e nome), mas com os valores em branco.
   Para preencher os valores da rescisão, mude `demitidos_sem_valores` para `false` na configuração.
-- **Desconto Refeição (260):** na planilha de 07/2026 esta coluna tem valores que não aparecem
-  na Prévia do mês. O desconto de vale refeição da Prévia vai para a coluna **Refeição (9999)**,
-  como na planilha de 07/2026. Para mudar, veja *Configuração* abaixo.
 - Funcionários além das linhas do modelo: o programa acrescenta linhas e ajusta as fórmulas de total.
 
 ## Conferências automáticas
@@ -88,8 +86,8 @@ O botão **Configuração...** abre o arquivo `conversor_config.json`, que fica 
 programa (ou em `%APPDATA%\ConversorPrevia` se a pasta não permitir gravação). Nele ficam:
 
 - `colunas`: para cada código de coluna da planilha, os códigos (`eventos`) e as descrições
-  (`descricoes`) dos eventos da Prévia que vão para ela. Exemplo: para levar o desconto de
-  refeição para a coluna 260 em vez da 9999, mova `692, 1211` e a descrição de `"9999"` para `"260"`.
+  (`descricoes`) dos eventos da Prévia que vão para ela. Exemplo: para voltar a preencher o
+  sindical, coloque `"eventos": [1860]` e `"descricoes": ["Contribuição Sindical"]` na coluna `"52"`.
 - `razao_social`: razão social por código de empresa.
 - `nome_arquivo`: padrão do nome do arquivo gerado.
 
@@ -109,7 +107,7 @@ python -m conversor previa.pdf --saida pasta/      # converte pela linha de coma
 - `conversor/leitor_pdf.py`: leitura da Prévia pela posição das palavras na página.
 - `conversor/mapeamento.py`: regras evento → coluna e configuração.
 - `conversor/planilha.py`: preenche o modelo editando o XML do .xlsx (preserva tudo do modelo).
-- `modelo/modelo_dominio.xlsx`: modelo vazio, criado a partir da planilha de 07/2026 com
+- `modelo/modelo_dominio.xlsx`: modelo vazio, criado a partir da planilha de 08/2026 com
   `python ferramentas/criar_modelo_limpo.py planilha.xlsx`.
 
 O executável é gerado automaticamente pelo GitHub Actions (`.github/workflows/build.yml`) a cada

@@ -19,7 +19,9 @@ from pathlib import Path
 
 from .leitor_pdf import Evento, Folha, Funcionario
 
-VERSAO_CONFIG = 1
+# Ao mudar as regras padrão, aumente a versão: configurações antigas recebem as novas regras
+# (as razões sociais cadastradas são mantidas).
+VERSAO_CONFIG = 2
 
 CONFIG_PADRAO: dict = {
     "versao": VERSAO_CONFIG,
@@ -36,7 +38,11 @@ CONFIG_PADRAO: dict = {
     "demitidos_sem_valores": True,
     # Chave = código da coluna na linha 10 do modelo.
     "colunas": {
-        "37": {"titulo": "Comissão", "eventos": [90], "descricoes": ["Comissões", "Comissão"]},
+        "37": {
+            "titulo": "Comissão",
+            "eventos": [90, 357],
+            "descricoes": ["Comissões", "Comissão", "Media Comissoes/DSR Ferias"],
+        },
         "150": {
             "titulo": "Horas Extras 50%",
             "eventos": [],
@@ -68,9 +74,9 @@ CONFIG_PADRAO: dict = {
         },
         "305": {"titulo": "Complemento VR e VA", "eventos": [1306], "descricoes": ["Complemento VR e VA"]},
         "259": {"titulo": "Auxílio Transporte", "eventos": [687], "descricoes": ["Auxílio Vale Transporte"]},
-        "260": {"titulo": "Desconto Refeição", "eventos": [], "descricoes": []},
-        "52": {"titulo": "Sindical", "eventos": [1860], "descricoes": ["Contribuição Sindical"]},
-        "9999": {"titulo": "Refeição", "eventos": [692, 1211], "descricoes": ["Desconto de Vale Refeição"]},
+        "260": {"titulo": "Desconto Refeição", "eventos": [692, 1211], "descricoes": ["Desconto de Vale Refeição"]},
+        "52": {"titulo": "Sindical", "eventos": [], "descricoes": []},
+        "9999": {"titulo": "", "eventos": [], "descricoes": []},
     },
     # Razão social usada na planilha, por código da empresa (substitui a do PDF).
     "razao_social": {},
@@ -99,12 +105,23 @@ class Config:
         if caminho.exists():
             try:
                 with open(caminho, encoding="utf-8") as f:
-                    return cls(json.load(f), caminho)
+                    dados = json.load(f)
             except json.JSONDecodeError as erro:
                 raise ValueError(
                     f"O arquivo de configuração tem um erro na linha {erro.lineno}, "
                     f"coluna {erro.colno}:\n{caminho}\n\n({erro.msg})"
                 ) from erro
+            if dados.get("versao", 1) < VERSAO_CONFIG:
+                razoes = dados.get("razao_social", {})
+                dados = copy.deepcopy(CONFIG_PADRAO)
+                dados["razao_social"] = razoes
+                config = cls(dados, caminho)
+                try:
+                    config.salvar()
+                except OSError:
+                    pass
+                return config
+            return cls(dados, caminho)
         config = cls(caminho=caminho)
         try:
             config.salvar()
