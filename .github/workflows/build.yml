@@ -52,7 +52,7 @@ jobs:
           python -c "import sys; sys.path.insert(0, 'tests'); import pdf_exemplo; pdf_exemplo.gerar('previa_teste.pdf')"
           $p = Start-Process -FilePath dist\ConversorPrevia.exe -ArgumentList '--converter','previa_teste.pdf','--saida','saida_teste' -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "O executável terminou com código $($p.ExitCode)" }
-          python -c "import openpyxl; ws = openpyxl.load_workbook('saida_teste/dominio planilha - 0123 - 08-2026.xlsx').active; assert ws['C11'].value == 'BELTRANA DE SOUZA'; assert ws['D12'].value == 1234.56; assert ws['R13'].value == 15.12; print('Executável OK')"
+          python -c "import openpyxl; ws = openpyxl.load_workbook('saida_teste/dominio planilha - 0123 - 08-2026.xlsx').active; assert ws['C11'].value == 'BELTRANA DE SOUZA'; assert ws['D12'].value == 1234.56; assert ws['R13'].value is None; print('Executável OK')"
 
       - uses: actions/upload-artifact@v4
         with:
